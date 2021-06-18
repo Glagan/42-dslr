@@ -1,7 +1,8 @@
+from list_is_numeric import list_is_numeric
 import os
 import sys
 import math
-import csv
+import reader
 
 
 def percentile(serie: list, percentile: int) -> float:
@@ -58,16 +59,7 @@ def describe_column(name: str, serie: list) -> dict:
 def describe(series: dict) -> None:
     described_series = []
     for key, values in sorted(series.items()):
-        # Check if the list only contains numerical or empty values
-        is_number = True
-        for v in values:
-            try:
-                if v != None and v != '':
-                    float(v)
-            except:
-                is_number = False
-                break
-        if is_number:
+        if list_is_numeric(values):
             described_series.append(describe_column(key, values))
     if len(described_series) == 0:
         print('No set of features available.')
@@ -118,17 +110,6 @@ if __name__ == '__main__':
         print('Usage: describe.py [dataset.csv]')
         exit()
     dataset = sys.argv[1]
-    series = {}
-    try:
-        with open(dataset) as csvDataFile:
-            csvReader = csv.DictReader(csvDataFile)
-            for row in csvReader:
-                # Separate each columns in a row to a distinct list
-                for key in row.keys():
-                    series.setdefault(key, [])
-                    series[key].append(row.get(key))
-    except IOError as err:
-        print('Failed to read dataset: {}.'.format(err))
-    except Exception as err:
-        print('Unknown error: {}.'.format(err))
-    describe(series)
+    series = reader.read_dataset(dataset)
+    if series:
+        describe(series)
