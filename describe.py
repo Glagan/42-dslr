@@ -74,8 +74,7 @@ def formatted_description(name: str, serie: pd.Series) -> dict:
 def describe(series: pd.DataFrame, output: bool = True) -> list:
     described_series = []
     for key, values in series.items():
-        if values.dtype in ['int32', 'int64', 'float32', 'float64']:
-            described_series.append(formatted_description(key, values))
+        described_series.append(formatted_description(key, values))
     if output:
         if len(described_series) == 0:
             print('No set of features available.')
@@ -129,6 +128,8 @@ if __name__ == '__main__':
     dataset = sys.argv[1]
     try:
         df = pd.read_csv(dataset)
+        df.drop(columns=['Index', 'Hogwarts House', 'First Name',
+                'Last Name', 'Birthday', 'Best Hand'], inplace=True)
         describe(df)
     except IOError as err:
         print('Failed to read dataset: {}'.format(err))
