@@ -142,4 +142,4 @@ if __name__ == "__main__":
     except IOError as err:
         print("Failed to read dataset: {}".format(err))
     except pd.errors.ParserError as err:
-        print("Invalid dataset dataset: {}".format(err))
+        print("Invalid dataset: {}".format(err))
