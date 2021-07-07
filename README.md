@@ -2,7 +2,7 @@
 
 ## Requirements
 
-``Python 3`` and ``matplotlib``.
+``Python 3``, ``pandas``, ``numpy`` and ``matplotlib``.
 
 ## Resources
 

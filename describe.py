@@ -22,8 +22,8 @@ def percentile(serie: list, percentile: int) -> float:
 
 def describe_serie(serie: pd.Series) -> dict:
     """
-    Calculate the number of elements, average, standard deviation, min, 25, 50 and 75 percentiles and the max of a given serie,
-    and returns them in a dict.
+    Calculate the number of elements, average, standard deviation, min,
+    25, 50 and 75 percentiles and the max of a given serie, and returns them in a dict.
     NaN and empty elements are ignored.
     """
     cleaned = serie.dropna().sort_values().to_list()

@@ -10,7 +10,7 @@ colors = {
 }
 
 
-def show_scatter(df: pd.DataFrame, requested: str):
+def show_scatter(df: pd.DataFrame):
     df.set_index("Index", drop=True, inplace=True)
     rowlength = int((len(df.columns) / 3) + 0.5)
     grouped = df.groupby("Hogwarts House")
@@ -36,18 +36,15 @@ def show_scatter(df: pd.DataFrame, requested: str):
 
 if __name__ == "__main__":
     argc = len(sys.argv)
-    if argc < 2 or argc > 3:
+    if argc != 2:
         print("Usage: scatter_plot.py [dataset.csv] {feature}")
         exit()
     dataset = sys.argv[1]
-    requested = None
-    if argc == 3:
-        requested = sys.argv[2]
     try:
         df = pd.read_csv(dataset)
         non_number = ["First Name", "Last Name", "Birthday", "Best Hand"]
         df.drop(columns=non_number, inplace=True)
-        show_scatter(df, requested)
+        show_scatter(df)
     except IOError as err:
         print("Failed to read dataset: {}".format(err))
     except pd.errors.ParserError as err:
