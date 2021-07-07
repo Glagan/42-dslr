@@ -3,14 +3,14 @@ import sys
 import pandas as pd
 
 
-def show_histograms(df: pd.DataFrame, features: list) -> None:
+def show_histograms(df: pd.DataFrame) -> None:
     rowlength = int(len(df.columns) / 2)
     fig, axs = plt.subplots(nrows=2, ncols=rowlength, figsize=(16, 8))
     all_axs = axs.flatten()
     group = df.groupby(["Hogwarts House"])
     i = 0
     for feature, values in df.items():
-        if feature == "Hogwarts House" or (features and feature in features):
+        if feature == "Hogwarts House":
             continue
         group[feature].hist(alpha=0.5, ax=all_axs[i], legend=True)
         all_axs[i].set_title(feature)
@@ -25,15 +25,17 @@ def show_histograms(df: pd.DataFrame, features: list) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    argc = len(sys.argv)
+    if argc > 2:
         print("Usage: histogram.py [dataset.csv]")
         exit()
-    dataset = sys.argv[1]
-    features = []
+    dataset = "datasets/dataset_train.csv"
+    if argc == 2:
+        dataset = sys.argv[1]
     try:
         df = pd.read_csv(dataset)
         df.drop(columns=["Index", "First Name", "Last Name", "Birthday", "Best Hand"], inplace=True)
-        show_histograms(df, features)
+        show_histograms(df)
     except IOError as err:
         print("Failed to read dataset: {}".format(err))
     except pd.errors.ParserError as err:

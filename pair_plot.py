@@ -77,10 +77,12 @@ def show_pair_plot(df: pd.DataFrame):
 
 if __name__ == "__main__":
     argc = len(sys.argv)
-    if argc != 2:
+    if argc > 2:
         print("Usage: scatter_plot.py [dataset.csv]")
         exit()
-    dataset = sys.argv[1]
+    dataset = "datasets/dataset_train.csv"
+    if argc == 2:
+        dataset = sys.argv[1]
     try:
         df = pd.read_csv(dataset)
         non_number = ["Index", "First Name", "Last Name", "Birthday", "Best Hand"]

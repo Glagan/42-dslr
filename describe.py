@@ -131,10 +131,13 @@ def describe(series: pd.DataFrame, output: bool = True) -> list:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    argc = len(sys.argv)
+    if argc > 2:
         print("Usage: describe.py [dataset.csv]")
         exit()
-    dataset = sys.argv[1]
+    dataset = "datasets/dataset_train.csv"
+    if argc == 2:
+        dataset = sys.argv[1]
     try:
         df = pd.read_csv(dataset)
         df.drop(columns=["Index", "Hogwarts House", "First Name", "Last Name", "Birthday", "Best Hand"], inplace=True)
