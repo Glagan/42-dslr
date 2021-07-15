@@ -93,7 +93,7 @@ def predict(x: np.ndarray, theta: np.ndarray):
     return sigmoid(X, theta)
 
 
-def classify(df: pd.DataFrame, features: list, thetas: np.ndarray, idx: list):
+def classify(df: pd.DataFrame, features: list, thetas: np.ndarray):
     np_df = df[features].to_numpy()
     rows, columns = np_df.shape
     classified = np.zeros(rows)
@@ -104,11 +104,10 @@ def classify(df: pd.DataFrame, features: list, thetas: np.ndarray, idx: list):
     return classified.astype(int)
 
 
-def accuracy(df: pd.DataFrame, results: np.ndarray, idx: list):
-    classes = df[idx].unique()
+def accuracy(df: pd.DataFrame, results: np.ndarray, y: np.ndarray, classes: list):
     indexes = {class_name: index for index, class_name in enumerate(classes)}
     accuracy = 0
-    for i, result in enumerate(df[idx]):
+    for i, result in enumerate(y):
         if indexes[result] == results[i]:
             accuracy += 1
     return (accuracy / len(df)) * 100
@@ -117,7 +116,7 @@ def accuracy(df: pd.DataFrame, results: np.ndarray, idx: list):
 if __name__ == "__main__":
     argc = len(sys.argv)
     if argc > 2:
-        print("Usage: scatter_plot.py [dataset.csv]")
+        print("Usage: logreg_train.py [dataset.csv]")
         exit()
     dataset = "datasets/dataset_train.csv"
     if argc == 2:
@@ -130,13 +129,13 @@ if __name__ == "__main__":
     except pd.errors.ParserError as err:
         print("Invalid dataset: {}".format(err))
         exit(1)
+    # Delete NA columns since they have missing data
     df.dropna(inplace=True, axis=0)
     class_column = "Hogwarts House"
     features = [
         # "Arithmancy",
         # "Potions",
         # "Care of Magical Creatures",
-        "Best Hand",
         "Astronomy",
         "Herbology",
         "Defense Against the Dark Arts",
@@ -148,15 +147,19 @@ if __name__ == "__main__":
         "Transfiguration",
         "Flying",
     ]
-    df["Best Hand"] = df["Best Hand"].astype(str).map({"Left": 0.0, "Right": 1.0})
+    # Normalize and calculate thetas for each classes
     normalized = normalize(df, features)
     thetas = logistic_regression(normalized, features, class_column)
-    classified = classify(normalized, features, thetas, class_column)
-    print("Accuracy: {:.2f}%".format(accuracy(df, classified, class_column)))
+    classified = classify(normalized, features, thetas)
     classes = df[class_column].unique()
-    df_thetas = pd.DataFrame({classes[index]: theta for index, theta in enumerate(thetas)})
+    print("Accuracy: {:.2f}%".format(accuracy(df, classified, df[class_column], classes)))
+    # Save thetas -- One classification per column
+    thetas_dict = {classes[index]: theta for index, theta in enumerate(thetas)}
+    thetas_dict["Features"] = features.copy()
+    thetas_dict["Features"].insert(0, "Intercept")
+    df_thetas = pd.DataFrame(thetas_dict)
     try:
-        df_thetas.to_csv("thetas.csv")
+        df_thetas.to_csv("thetas.csv", index=False)
         print("Saved thetas to `thetas.csv`")
     except IOError as err:
         print("Failed to save thetas: {}".format(err))
