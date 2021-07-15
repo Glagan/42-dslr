@@ -37,7 +37,7 @@ def show_scatter(df: pd.DataFrame):
 if __name__ == "__main__":
     argc = len(sys.argv)
     if argc > 2:
-        print("Usage: scatter_plot.py [dataset.csv] {feature}")
+        print("Usage: scatter_plot.py [dataset.csv]")
         exit()
     dataset = "datasets/dataset_train.csv"
     if argc == 2:

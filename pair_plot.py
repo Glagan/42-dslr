@@ -43,34 +43,25 @@ def show_pair_plot(df: pd.DataFrame):
             i += 1
     plt.show()
     print(
-        "The diagonal of the scatter matrix is the dispersion of the feature values, \
-        each rows and columns show the feature plotted against each other features \
-        (X/Y reversed on each side of the diagonal)."
+        "The diagonal of the scatter matrix is the dispersion of the feature values each rows and columns show the feature plotted against each other features (X/Y reversed on each side of the diagonal)."
     )
     print(
-        "Features that have 4 visible groups against at least multiple other features \
-        should be selected since they will make the logistic regression much easier and accurate."
+        "Features that have 4 visible groups against at least multiple other features should be selected since they will make the logistic regression much easier and accurate."
     )
     print(
-        "> *Arithmancy*, *Potions* and *Care of Magical Creatures* \
-        should be avoided since they all have only two visible groups against all other features."
+        "> *Arithmancy*, *Potions* and *Care of Magical Creatures* should be avoided since they all have only two visible groups against all other features."
     )
     print(
-        "> *Astronomy*, *Herbology*, *Defense Against the Dark Arts*, *Ancient Runes* and *Charms* \
-        should be good features to use in the logistic regression."
+        "> *Astronomy*, *Herbology*, *Defense Against the Dark Arts*, *Ancient Runes* and *Charms* should be good features to use in the logistic regression."
     )
     print(
-        "> *Astronomy* and *Herbology* are also complementary, their dispersion (on the diagonal) \
-        shows that they have a different dispersion for two different groups of two."
+        "> *Astronomy* and *Herbology* are also complementary, their dispersion (on the diagonal) shows that they have a different dispersion for two different groups of two."
     )
     print(
-        "> *Divination*, *Muggle Studies*, *History of Magic*, *Transfiguration* and *Flying* \
-        could help the logistic regression but also might introduce false positive \
-        since they only have 3 visible groups."
+        "> *Divination*, *Muggle Studies*, *History of Magic*, *Transfiguration* and *Flying* could help the logistic regression but also might introduce false positive since they only have 3 visible groups."
     )
     print(
-        '> Like with *Astronomy* and *Herbology*, the three features *Divination*, *Muggle Studies* and \
-        *History of Magic* are "complementary", they each extract one group from the other 3 groups.'
+        '> Like with *Astronomy* and *Herbology*, the three features *Divination*, *Muggle Studies* and *History of Magic* are "complementary", they each extract one group from the other 3 groups.'
     )
     print('> They also extract features that have a low dispersion in the "good" features selected.')
 
