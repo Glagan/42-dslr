@@ -21,7 +21,7 @@ def cost(x: np.ndarray, y: np.ndarray, theta: np.ndarray):
     return (1 / m) * -y.transpose().dot(np.log(h)) - (1 - y).transpose().dot(np.log(1 - h))
 
 
-def gradient_descent(df: pd.DataFrame, features: list, idx: list):
+def stochastic_gradient_descent(df: pd.DataFrame, features: list, idx: list, batch_size: int = -1):
     """
     Calculate the thetas for each type of the class that's being classified.
     We have as many columns as features.
@@ -37,6 +37,9 @@ def gradient_descent(df: pd.DataFrame, features: list, idx: list):
     X = np.hstack((np.ones((rows, 1)), np_df))
     m = len(X)
     classes = df[idx].unique()
+    set_length = len(X)
+    if batch_size < 1:
+        batch_size = int(set_length / 10)
     for i in classes:
         # Replace current house name by 1
         # and set all other to 0 (one vs all)
@@ -45,10 +48,13 @@ def gradient_descent(df: pd.DataFrame, features: list, idx: list):
         theta = np.zeros(columns + 1)
         current_cost = []
         for i in range(iterations):
+            current_indexes = np.random.randint(set_length, size=batch_size)
+            current_x = X[current_indexes, :]
+            current_y = y[current_indexes]
             h = sigmoid(X, theta)
             gradient = (1 / m) * X.transpose().dot(h - y)
             theta -= alpha * gradient
-            current_cost.append(cost(X, y, theta))
+            current_cost.append(cost(current_x, current_y, theta))
         thetas.append(theta)
         costs.append(current_cost)
     row_cols = int(len(costs) / 2)
@@ -152,7 +158,7 @@ if __name__ == "__main__":
     ]
     # Normalize and calculate thetas for each classes
     normalized = normalize(df, features)
-    thetas = gradient_descent(normalized, features, class_column)
+    thetas = stochastic_gradient_descent(normalized, features, class_column)
     classified = classify(normalized, features, thetas)
     classes = df[class_column].unique()
     print("Accuracy: {:.2f}%".format(accuracy(df, classified, df[class_column], classes)))
