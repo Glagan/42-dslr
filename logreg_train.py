@@ -17,7 +17,8 @@ def cost(x: np.ndarray, y: np.ndarray, theta: np.ndarray):
     Cost of the given x with the weights theta against the given answers y.
     """
     h = sigmoid(x, theta)
-    return -(1 / len(x)) * np.sum(y * np.log(h) + (1 - y) * (np.log(1 - h)))
+    m = len(x)
+    return (1 / m) * -y.transpose().dot(np.log(h)) - (1 - y).transpose().dot(np.log(1 - h))
 
 
 def gradient_descent(x: np.ndarray, y: np.ndarray, theta: np.ndarray):
