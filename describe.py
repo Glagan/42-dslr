@@ -32,6 +32,7 @@ def describe_serie(serie: pd.Series) -> dict:
         return {}
     min = cleaned[0]
     max = cleaned[-1]
+    range = max - min
     s_sum = sum(row for row in cleaned)
     mean = s_sum / count
     var = sum((row - mean) ** 2 for row in cleaned) / (count)
@@ -42,12 +43,14 @@ def describe_serie(serie: pd.Series) -> dict:
     return {
         "count": count,
         "mean": mean,
+        "var": var,
         "std": std,
         "min": min,
         "per25": per25,
         "per50": per50,
         "per75": per75,
         "max": max,
+        "range": range,
     }
 
 
@@ -60,12 +63,14 @@ def formatted_description(name: str, serie: pd.Series) -> dict:
         "name": name,
         "count": "{:.3f}".format(raw_results["count"]),
         "mean": "{:.3f}".format(raw_results["mean"]),
+        "var": "{:.3f}".format(raw_results["var"]),
         "std": "{:.3f}".format(raw_results["std"]),
         "min": "{:.3f}".format(raw_results["min"]),
         "per25": "{:.3f}".format(raw_results["per25"]),
         "per50": "{:.3f}".format(raw_results["per50"]),
         "per75": "{:.3f}".format(raw_results["per75"]),
         "max": "{:.3f}".format(raw_results["max"]),
+        "range": "{:.3f}".format(raw_results["range"]),
     }
     # Set length to the longest column + 2 for padding
     results["length"] = sorted(len(v) for v in results.values())[-1] + 2
@@ -84,12 +89,14 @@ def describe(series: pd.DataFrame, output: bool = True) -> list:
                 "name": "name",
                 "count": "count",
                 "mean": "mean",
+                "var": "var",
                 "std": "std",
                 "min": "min",
                 "25%": "per25",
                 "50%": "per50",
                 "75%": "per75",
                 "max": "max",
+                "range": "range",
             }
             # Calculate the set of features to show per line
             try:
