@@ -3,14 +3,14 @@ import sys
 import pandas as pd
 
 
-def show_histograms(df: pd.DataFrame) -> None:
-    rowlength = int(len(df.columns) / 2)
-    fig, axs = plt.subplots(nrows=2, ncols=rowlength, figsize=(16, 8))
+def show_histograms(df: pd.DataFrame, class_index: str) -> None:
+    ncols = int(len(df.columns) / 2)
+    fig, axs = plt.subplots(nrows=2, ncols=ncols, figsize=(16, 8))
     all_axs = axs.flatten()
-    group = df.groupby(["Hogwarts House"])
+    group = df.groupby([class_index])
     i = 0
     for feature, values in df.items():
-        if feature == "Hogwarts House":
+        if feature == class_index:
             continue
         group[feature].hist(alpha=0.5, ax=all_axs[i], legend=True)
         all_axs[i].set_title(feature)
@@ -20,8 +20,6 @@ def show_histograms(df: pd.DataFrame) -> None:
         i += 1
     plt.subplots_adjust(wspace=0.3, hspace=0.3)
     plt.show()
-    print("An homogeneous feature should have it's histograms stacked on top of each other.")
-    print("> Arithmancy and Care of Magical Creatures have an homogeneous score distribution between all four houses.")
 
 
 if __name__ == "__main__":
@@ -34,8 +32,13 @@ if __name__ == "__main__":
         dataset = sys.argv[1]
     try:
         df = pd.read_csv(dataset)
-        df.drop(columns=["Index", "First Name", "Last Name", "Birthday", "Best Hand"], inplace=True)
-        show_histograms(df)
+        non_number = ["Index", "First Name", "Last Name", "Birthday", "Best Hand"]
+        df.drop(columns=non_number, inplace=True)
+        show_histograms(df, "Hogwarts House")
+        print("An homogeneous feature should have it's histograms stacked on top of each other.")
+        print(
+            "> Arithmancy and Care of Magical Creatures have an homogeneous score distribution between all four houses."
+        )
     except IOError as err:
         print("Failed to read dataset: {}".format(err))
     except pd.errors.ParserError as err:
