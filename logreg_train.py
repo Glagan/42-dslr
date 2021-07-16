@@ -21,13 +21,14 @@ def cost(x: np.ndarray, y: np.ndarray, theta: np.ndarray):
     return (1 / m) * -y.transpose().dot(np.log(h)) - (1 - y).transpose().dot(np.log(1 - h))
 
 
-def gradient_descent(df: pd.DataFrame, features: list, idx: list):
+def gradient_descent(df: pd.DataFrame, features: list, class_index: list):
     """
     Calculate the thetas for each type of the class that's being classified.
     We have as many columns as features.
     Theta is initialized to 0.
     """
     print("Using {} features for the logistic regression".format(len(features)))
+    # Define parameters
     thetas = []
     costs = []
     alpha = 0.1
@@ -36,12 +37,13 @@ def gradient_descent(df: pd.DataFrame, features: list, idx: list):
     rows, columns = np_df.shape
     X = np.hstack((np.ones((rows, 1)), np_df))
     m = len(X)
-    classes = df[idx].unique()
+    classes = df[class_index].unique()
+    # Calculate a different theta for each classes
     for i in classes:
         # Replace current house name by 1
         # and set all other to 0 (one vs all)
         print("Finding theta for {}".format(i))
-        y = np.where(df[idx] == i, 1, 0)
+        y = np.where(df[class_index] == i, 1, 0)
         theta = np.zeros(columns + 1)
         current_cost = []
         for i in range(iterations):
@@ -51,6 +53,7 @@ def gradient_descent(df: pd.DataFrame, features: list, idx: list):
             current_cost.append(cost(X, y, theta))
         thetas.append(theta)
         costs.append(current_cost)
+    # Cost plot
     row_cols = int(len(costs) / 2)
     fig, axs = plt.subplots(row_cols, row_cols)
     flat_axs = axs.flatten()

@@ -21,42 +21,49 @@ def cost(x: np.ndarray, y: np.ndarray, theta: np.ndarray):
     return (1 / m) * -y.transpose().dot(np.log(h)) - (1 - y).transpose().dot(np.log(1 - h))
 
 
-def stochastic_gradient_descent(df: pd.DataFrame, features: list, idx: list, batch_size: int = -1):
+def stochastic_gradient_descent(df: pd.DataFrame, features: list, class_index: list):
     """
     Calculate the thetas for each type of the class that's being classified.
     We have as many columns as features.
     Theta is initialized to 0.
     """
     print("Using {} features for the logistic regression".format(len(features)))
+    # Define parameters
     thetas = []
     costs = []
-    alpha = 0.1
-    iterations = 2500
+    alpha = 0.3
+    iterations = 5000
     np_df = df[features].to_numpy()
     rows, columns = np_df.shape
     X = np.hstack((np.ones((rows, 1)), np_df))
     m = len(X)
-    classes = df[idx].unique()
+    classes = df[class_index].unique()
     set_length = len(X)
-    if batch_size < 1:
-        batch_size = int(set_length / 10)
+    decay = 0.1
+    batch_size = int(set_length / 10)
+    # Calculate a different theta for each classes
     for i in classes:
         # Replace current house name by 1
         # and set all other to 0 (one vs all)
         print("Finding theta for {}".format(i))
-        y = np.where(df[idx] == i, 1, 0)
+        y = np.where(df[class_index] == i, 1, 0)
         theta = np.zeros(columns + 1)
         current_cost = []
+        diff = 0
         for i in range(iterations):
-            current_indexes = np.random.randint(set_length, size=batch_size)
-            current_x = X[current_indexes, :]
-            current_y = y[current_indexes]
-            h = sigmoid(X, theta)
-            gradient = (1 / m) * X.transpose().dot(h - y)
-            theta -= alpha * gradient
-            current_cost.append(cost(current_x, current_y, theta))
+            # Generate a random batch of batch_size
+            current_indexes = np.unique(np.random.randint(set_length, size=batch_size))
+            batch_x = X[current_indexes, :]
+            batch_y = y[current_indexes]
+            h = sigmoid(batch_x, theta)
+            gradient = (1 / m) * batch_x.transpose().dot(h - batch_y)
+            # Calculate the diff between the previous gradient and apply decay
+            diff = decay * diff - alpha * gradient
+            theta += diff
+            current_cost.append(cost(batch_x, batch_y, theta))
         thetas.append(theta)
         costs.append(current_cost)
+    # Cost plot
     row_cols = int(len(costs) / 2)
     fig, axs = plt.subplots(row_cols, row_cols)
     flat_axs = axs.flatten()
