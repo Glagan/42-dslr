@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def show_histograms(df: pd.DataFrame, class_index: str) -> None:
-    ncols = int(len(df.columns) / 2)
+    ncols = int(((len(df.columns) - 1) / 2) + 0.5)
     fig, axs = plt.subplots(nrows=2, ncols=ncols, figsize=(16, 8))
     all_axs = axs.flatten()
     group = df.groupby([class_index])
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         show_histograms(df, "Hogwarts House")
         print("An homogeneous feature should have it's histograms stacked on top of each other.")
         print(
-            "> Arithmancy and Care of Magical Creatures have an homogeneous score distribution between all four houses."
+            "> *Arithmancy* and *Care of Magical Creatures* have an homogeneous score distribution between all four houses."
         )
     except IOError as err:
         print("Failed to read dataset: {}".format(err))

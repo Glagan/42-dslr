@@ -32,13 +32,14 @@ def gradient_descent(df: pd.DataFrame, features: list, class_index: list):
     thetas = []
     costs = []
     alpha = 0.1
-    iterations = 2500
+    iterations = 5000
     np_df = df[features].to_numpy()
     rows, columns = np_df.shape
     X = np.hstack((np.ones((rows, 1)), np_df))
     m = len(X)
     classes = df[class_index].unique()
     # Calculate a different theta for each classes
+    step = iterations / 10
     for i in classes:
         # Replace current house name by 1
         # and set all other to 0 (one vs all)
@@ -51,6 +52,9 @@ def gradient_descent(df: pd.DataFrame, features: list, class_index: list):
             gradient = (1 / m) * X.transpose().dot(h - y)
             theta -= alpha * gradient
             current_cost.append(cost(X, y, theta))
+            if i % step == 0:
+                current_accuracy = accuracy(h, y, m, [0, 1])
+                print("it={}, cost={:.2f}, accuracy={:.2f}".format(i, current_cost[-1], current_accuracy))
         thetas.append(theta)
         costs.append(current_cost)
     # Cost plot
@@ -107,16 +111,16 @@ def classify(df: pd.DataFrame, features: list, thetas: np.ndarray):
     return classified.astype(int)
 
 
-def accuracy(df: pd.DataFrame, results: np.ndarray, y: np.ndarray, classes: list):
+def accuracy(predictions: np.ndarray, y: np.ndarray, length: int, classes: list):
     """
     Calculate the accuracy of the predictions with a given set of results by comparing each results one by one.
     """
     indexes = {class_name: index for index, class_name in enumerate(classes)}
     accuracy = 0
     for i, result in enumerate(y):
-        if indexes[result] == results[i]:
+        if indexes[result] == int(predictions[i]):
             accuracy += 1
-    return (accuracy / len(df)) * 100
+    return accuracy / length
 
 
 if __name__ == "__main__":
@@ -140,25 +144,30 @@ if __name__ == "__main__":
     class_column = "Hogwarts House"
     features = [
         # "Arithmancy",
-        # "Potions",
         # "Care of Magical Creatures",
+        # "Potions",
+        "Best Hand",
         "Astronomy",
         "Herbology",
         "Defense Against the Dark Arts",
         "Ancient Runes",
         "Charms",
-        "Divination",
-        "Muggle Studies",
-        "History of Magic",
-        "Transfiguration",
-        "Flying",
+        # "Divination",
+        # "Muggle Studies",
+        # "History of Magic",
+        # "Transfiguration",
+        # "Flying",
     ]
+    # Convert string features to int
+    for feature in features:
+        if df[feature].dtype == "object":
+            df[feature], _ = df[feature].factorize()
     # Normalize and calculate thetas for each classes
     normalized = normalize(df, features)
     thetas = gradient_descent(normalized, features, class_column)
     classified = classify(normalized, features, thetas)
     classes = df[class_column].unique()
-    print("Accuracy: {:.2f}%".format(accuracy(df, classified, df[class_column], classes)))
+    print("Accuracy: {:.2f}".format(accuracy(classified, df[class_column], len(df), classes)))
     # Save thetas -- One classification per column
     thetas_dict = {classes[index]: theta for index, theta in enumerate(thetas)}
     thetas_dict["Features"] = features.copy()

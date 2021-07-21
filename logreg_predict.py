@@ -71,6 +71,10 @@ if __name__ == "__main__":
     # Predict each values from the test dataset
     try:
         df = pd.read_csv(dataset)
+        # Convert string features to int
+        for feature in features:
+            if df[feature].dtype == "object":
+                df[feature], _ = df[feature].factorize()
         normalized = normalize(df, features)
         classified = classify(normalized, features, thetas)
         named_classes = [classes[index] for index in classified]
@@ -82,7 +86,7 @@ if __name__ == "__main__":
         exit(1)
     # Save found houses
     try:
-        df_houses = pd.DataFrame(named_classes, columns=["House"])
+        df_houses = pd.DataFrame(named_classes, columns=["Hogwarts House"])
         print(df_houses)
         df_houses.to_csv("houses.csv", index=True, index_label="Index")
         print("Saved predictions to `houses.csv`")

@@ -152,17 +152,22 @@ if __name__ == "__main__":
         # "Arithmancy",
         # "Potions",
         # "Care of Magical Creatures",
+        "Best Hand",
         "Astronomy",
         "Herbology",
         "Defense Against the Dark Arts",
         "Ancient Runes",
         "Charms",
-        "Divination",
-        "Muggle Studies",
-        "History of Magic",
-        "Transfiguration",
-        "Flying",
+        # "Divination",
+        # "Muggle Studies",
+        # "History of Magic",
+        # "Transfiguration",
+        # "Flying",
     ]
+    # Convert string features to int
+    for feature in features:
+        if df[feature].dtype == "object":
+            df[feature], _ = df[feature].factorize()
     # Normalize and calculate thetas for each classes
     normalized = normalize(df, features)
     thetas = stochastic_gradient_descent(normalized, features, class_column)
