@@ -4,21 +4,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def sigmoid(x: np.ndarray, theta: np.ndarray):
+def sigmoid(z: np.ndarray):
     """
     The "boundary function",
     which determines to which group the given z is supposed to be in.
     """
-    return 1 / (1 + np.exp(-x.dot(theta)))
+    return 1 / (1 + np.exp(-z))
 
 
-def cost(x: np.ndarray, y: np.ndarray, theta: np.ndarray):
+def cost(x: np.ndarray, y: np.ndarray, m: int, theta: np.ndarray):
     """
     Cost of the given x with the weights theta against the given answers y.
     """
     h = sigmoid(x, theta)
-    m = len(x)
     return (1 / m) * -y.transpose().dot(np.log(h)) - (1 - y).transpose().dot(np.log(1 - h))
+
+
+def predict(x: np.ndarray, theta: np.ndarray):
+    return sigmoid(x.dot(theta)) >= 0.5
 
 
 def stochastic_gradient_descent(df: pd.DataFrame, features: list, class_index: list):
@@ -60,7 +63,7 @@ def stochastic_gradient_descent(df: pd.DataFrame, features: list, class_index: l
             # Calculate the diff between the previous gradient and apply decay
             diff = decay * diff - alpha * gradient
             theta += diff
-            current_cost.append(cost(batch_x, batch_y, theta))
+            current_cost.append(cost(batch_x, batch_y, m, theta))
         thetas.append(theta)
         costs.append(current_cost)
     # Cost plot
@@ -89,15 +92,8 @@ def normalize(df: pd.DataFrame, features: list):
     """
     normalized = df.copy()
     for (name, data) in normalized[features].iteritems():
-        min = data.min()
-        max = data.max()
-        normalized[name] = normalized[name].apply(minMaxNormalize, args=(min, max))
+        normalized[name] = normalized[name].apply(minMaxNormalize, args=(data.min(), data.max()))
     return normalized
-
-
-def predict(x: np.ndarray, theta: np.ndarray):
-    X = np.hstack((np.ones((x.shape[0], 1)), x))
-    return sigmoid(X, theta)
 
 
 def classify(df: pd.DataFrame, features: list, thetas: np.ndarray):
@@ -111,7 +107,7 @@ def classify(df: pd.DataFrame, features: list, thetas: np.ndarray):
     rows, columns = np_df.shape
     classified = np.zeros(rows)
     X = np.hstack((np.ones((rows, 1)), np_df))
-    predictions = np.array([sigmoid(X, theta) for theta in thetas])
+    predictions = np.array([sigmoid(X.dot(theta)) for theta in thetas])
     for index, column in enumerate(predictions.transpose()):
         classified[index] = column.argmax()
     return classified.astype(int)

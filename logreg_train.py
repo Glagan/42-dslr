@@ -4,24 +4,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def sigmoid(x: np.ndarray, theta: np.ndarray):
+def sigmoid(z: np.ndarray):
     """
     The "boundary function",
     which determines to which group the given z is supposed to be in.
     """
-    return 1 / (1 + np.exp(-x.dot(theta)))
+    return 1 / (1 + np.exp(-z))
 
 
-def cost(x: np.ndarray, y: np.ndarray, theta: np.ndarray):
+def cost(x: np.ndarray, y: np.ndarray, m: int, theta: np.ndarray):
     """
     Cost of the given x with the weights theta against the given answers y.
     """
-    h = sigmoid(x, theta)
-    m = len(x)
+    h = sigmoid(x.dot(theta))
     return (1 / m) * -y.transpose().dot(np.log(h)) - (1 - y).transpose().dot(np.log(1 - h))
 
 
-def gradient_descent(df: pd.DataFrame, features: list, class_index: list):
+def predict(x: np.ndarray, theta: np.ndarray):
+    return sigmoid(x.dot(theta)) >= 0.5
+
+
+def gradient_descent(df: pd.DataFrame, features: list, class_index: list, alpha: int = 0.01, iterations: int = 10000):
     """
     Calculate the thetas for each type of the class that's being classified.
     We have as many columns as features.
@@ -31,8 +34,6 @@ def gradient_descent(df: pd.DataFrame, features: list, class_index: list):
     # Define parameters
     thetas = []
     costs = []
-    alpha = 0.1
-    iterations = 5000
     np_df = df[features].to_numpy()
     rows, columns = np_df.shape
     X = np.hstack((np.ones((rows, 1)), np_df))
@@ -48,12 +49,12 @@ def gradient_descent(df: pd.DataFrame, features: list, class_index: list):
         theta = np.zeros(columns + 1)
         current_cost = []
         for i in range(iterations):
-            h = sigmoid(X, theta)
+            h = sigmoid(X.dot(theta))
             gradient = (1 / m) * X.transpose().dot(h - y)
             theta -= alpha * gradient
-            current_cost.append(cost(X, y, theta))
+            current_cost.append(cost(X, y, m, theta))
             if i % step == 0:
-                current_accuracy = accuracy(h, y, m, [0, 1])
+                current_accuracy = accuracy(predict(X, theta), y, [0, 1])
                 print("it={}, cost={:.2f}, accuracy={:.2f}".format(i, current_cost[-1], current_accuracy))
         thetas.append(theta)
         costs.append(current_cost)
@@ -69,7 +70,7 @@ def gradient_descent(df: pd.DataFrame, features: list, class_index: list):
         flat_axs[i].plot(class_cost)
         i += 1
     fig.suptitle("Cost of all classification over Iterations")
-    plt.show()
+    # plt.show()
     return thetas
 
 
@@ -83,15 +84,8 @@ def normalize(df: pd.DataFrame, features: list):
     """
     normalized = df.copy()
     for (name, data) in normalized[features].iteritems():
-        min = data.min()
-        max = data.max()
-        normalized[name] = normalized[name].apply(minMaxNormalize, args=(min, max))
+        normalized[name] = normalized[name].apply(minMaxNormalize, args=(data.min(), data.max()))
     return normalized
-
-
-def predict(x: np.ndarray, theta: np.ndarray):
-    X = np.hstack((np.ones((x.shape[0], 1)), x))
-    return sigmoid(X, theta)
 
 
 def classify(df: pd.DataFrame, features: list, thetas: np.ndarray):
@@ -105,13 +99,13 @@ def classify(df: pd.DataFrame, features: list, thetas: np.ndarray):
     rows, columns = np_df.shape
     classified = np.zeros(rows)
     X = np.hstack((np.ones((rows, 1)), np_df))
-    predictions = np.array([sigmoid(X, theta) for theta in thetas])
+    predictions = np.array([sigmoid(X.dot(theta)) for theta in thetas])
     for index, column in enumerate(predictions.transpose()):
         classified[index] = column.argmax()
     return classified.astype(int)
 
 
-def accuracy(predictions: np.ndarray, y: np.ndarray, length: int, classes: list):
+def accuracy(predictions: np.ndarray, y: np.ndarray, classes: list):
     """
     Calculate the accuracy of the predictions with a given set of results by comparing each results one by one.
     """
@@ -120,7 +114,7 @@ def accuracy(predictions: np.ndarray, y: np.ndarray, length: int, classes: list)
     for i, result in enumerate(y):
         if indexes[result] == int(predictions[i]):
             accuracy += 1
-    return accuracy / length
+    return accuracy / len(predictions)
 
 
 if __name__ == "__main__":
@@ -146,17 +140,17 @@ if __name__ == "__main__":
         # "Arithmancy",
         # "Care of Magical Creatures",
         # "Potions",
-        "Best Hand",
+        # "Best Hand",
         "Astronomy",
         "Herbology",
-        "Defense Against the Dark Arts",
+        # "Defense Against the Dark Arts",
         "Ancient Runes",
         "Charms",
         # "Divination",
         # "Muggle Studies",
         # "History of Magic",
         # "Transfiguration",
-        # "Flying",
+        "Flying",
     ]
     # Convert string features to int
     for feature in features:
@@ -164,10 +158,10 @@ if __name__ == "__main__":
             df[feature], _ = df[feature].factorize()
     # Normalize and calculate thetas for each classes
     normalized = normalize(df, features)
-    thetas = gradient_descent(normalized, features, class_column)
+    thetas = gradient_descent(normalized, features, class_column, alpha=0.01, iterations=10000)
     classified = classify(normalized, features, thetas)
     classes = df[class_column].unique()
-    print("Accuracy: {:.2f}".format(accuracy(classified, df[class_column], len(df), classes)))
+    print("Accuracy: {:.2f}".format(accuracy(classified, df[class_column], classes)))
     # Save thetas -- One classification per column
     thetas_dict = {classes[index]: theta for index, theta in enumerate(thetas)}
     thetas_dict["Features"] = features.copy()

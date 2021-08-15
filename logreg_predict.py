@@ -3,12 +3,12 @@ import pandas as pd
 import numpy as np
 
 
-def sigmoid(x: np.ndarray, theta: np.ndarray):
+def sigmoid(z: np.ndarray):
     """
     The "boundary function",
     which determines to which group the given z is supposed to be in.
     """
-    return 1 / (1 + np.exp(-x.dot(theta)))
+    return 1 / (1 + np.exp(-z))
 
 
 def minMaxNormalize(val, min, max):
@@ -21,15 +21,8 @@ def normalize(df: pd.DataFrame, features: list):
     """
     normalized = df.copy()
     for (name, data) in normalized[features].iteritems():
-        min = data.min()
-        max = data.max()
-        normalized[name] = normalized[name].apply(minMaxNormalize, args=(min, max))
+        normalized[name] = normalized[name].apply(minMaxNormalize, args=(data.min(), data.max()))
     return normalized
-
-
-def predict(x: np.ndarray, theta: np.ndarray):
-    X = np.hstack((np.ones((x.shape[0], 1)), x))
-    return sigmoid(X, theta)
 
 
 def classify(df: pd.DataFrame, features: list, thetas: np.ndarray):
@@ -37,7 +30,7 @@ def classify(df: pd.DataFrame, features: list, thetas: np.ndarray):
     rows, columns = np_df.shape
     classified = np.zeros(rows)
     X = np.hstack((np.ones((rows, 1)), np_df))
-    predictions = np.array([sigmoid(X, theta) for theta in thetas])
+    predictions = np.array([sigmoid(X.dot(theta)) for theta in thetas])
     for index, column in enumerate(predictions.transpose()):
         classified[index] = column.argmax()
     return classified.astype(int)
