@@ -1,39 +1,12 @@
 import sys
 import pandas as pd
-import numpy as np
+from logreg_train import normalize, classify
 
 
-def sigmoid(z: np.ndarray):
-    """
-    The "boundary function",
-    which determines to which group the given z is supposed to be in.
-    """
-    return 1 / (1 + np.exp(-z))
-
-
-def minMaxNormalize(val, min, max):
-    return (val - min) / (max - min)
-
-
-def normalize(df: pd.DataFrame, features: list):
-    """
-    Apply a min-max normalization to all features columns in a Pandas DataFrame.
-    """
-    normalized = df.copy()
-    for (name, data) in normalized[features].iteritems():
-        normalized[name] = normalized[name].apply(minMaxNormalize, args=(data.min(), data.max()))
-    return normalized
-
-
-def classify(df: pd.DataFrame, features: list, thetas: np.ndarray):
-    np_df = df[features].to_numpy()
-    rows, columns = np_df.shape
-    classified = np.zeros(rows)
-    X = np.hstack((np.ones((rows, 1)), np_df))
-    predictions = np.array([sigmoid(X.dot(theta)) for theta in thetas])
-    for index, column in enumerate(predictions.transpose()):
-        classified[index] = column.argmax()
-    return classified.astype(int)
+def predict(df: pd.DataFrame, features: list, classes: list, thetas: pd.DataFrame) -> pd.DataFrame:
+    classified = classify(df, features, thetas)
+    named_classes = [classes[index] for index in classified]
+    return pd.DataFrame(named_classes, columns=["Hogwarts House"])
 
 
 if __name__ == "__main__":
@@ -56,12 +29,12 @@ if __name__ == "__main__":
         thetas = df_thetas.to_numpy().transpose()
         classes = df_thetas.columns.to_list()
     except IOError as err:
-        print("Could not find or read thetas, use `logreg_train.py` first: {}".format(err))
+        print(f"Could not find or read thetas, use `logreg_train.py` first: {err}")
         exit(1)
     except pd.errors.ParserError as err:
-        print("Invalid dataset: {}".format(err))
+        print(f"Invalid dataset: {err}")
         exit(1)
-    # Predict each values from the test dataset
+    # Load, convert and normalize the test Dataset
     try:
         df = pd.read_csv(dataset)
         # Convert string features to int
@@ -69,20 +42,19 @@ if __name__ == "__main__":
             if df[feature].dtype == "object":
                 df[feature], _ = df[feature].factorize()
         normalized = normalize(df, features)
-        classified = classify(normalized, features, thetas)
-        named_classes = [classes[index] for index in classified]
     except IOError as err:
-        print("Failed to read dataset: {}".format(err))
+        print(f"Failed to read dataset: {err}")
         exit(1)
     except pd.errors.ParserError as err:
-        print("Invalid dataset: {}".format(err))
+        print(f"Invalid dataset: {err}")
         exit(1)
+    # Predict each values from the test dataset
+    df_houses = predict(normalized, features, classes, thetas)
     # Save found houses
     try:
-        df_houses = pd.DataFrame(named_classes, columns=["Hogwarts House"])
         print(df_houses)
         df_houses.to_csv("houses.csv", index=True, index_label="Index")
         print("Saved predictions to `houses.csv`")
     except IOError as err:
-        print("Failed to save predictions: {}".format(err))
+        print(f"Failed to save predictions: {err}")
         exit(1)

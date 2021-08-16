@@ -24,13 +24,21 @@ def predict(x: np.ndarray, theta: np.ndarray):
     return sigmoid(x.dot(theta)) >= 0.5
 
 
-def gradient_descent(df: pd.DataFrame, features: list, class_index: list, alpha: int = 0.01, iterations: int = 10000):
+def gradient_descent(
+    df: pd.DataFrame,
+    class_column: str,
+    features: list,
+    alpha: int = 0.01,
+    iterations: int = 10000,
+    verbose: bool = True,
+):
     """
     Calculate the thetas for each type of the class that's being classified.
     We have as many columns as features.
     Theta is initialized to 0.
     """
-    print("Using {} features for the logistic regression".format(len(features)))
+    if verbose:
+        print(f"Using {len(features)} features for the logistic regression")
     # Define parameters
     thetas = []
     costs = []
@@ -38,14 +46,15 @@ def gradient_descent(df: pd.DataFrame, features: list, class_index: list, alpha:
     rows, columns = np_df.shape
     X = np.hstack((np.ones((rows, 1)), np_df))
     m = len(X)
-    classes = df[class_index].unique()
+    classes = df[class_column].unique()
     # Calculate a different theta for each classes
     step = iterations / 10
     for i in classes:
         # Replace current house name by 1
         # and set all other to 0 (one vs all)
-        print("Finding theta for {}".format(i))
-        y = np.where(df[class_index] == i, 1, 0)
+        if verbose:
+            print(f"Finding theta for {i}")
+        y = np.where(df[class_column] == i, 1, 0)
         theta = np.zeros(columns + 1)
         current_cost = []
         for i in range(iterations):
@@ -53,24 +62,25 @@ def gradient_descent(df: pd.DataFrame, features: list, class_index: list, alpha:
             gradient = (1 / m) * X.transpose().dot(h - y)
             theta -= alpha * gradient
             current_cost.append(cost(X, y, m, theta))
-            if i % step == 0:
+            if verbose and i % step == 0:
                 current_accuracy = accuracy(predict(X, theta), y, [0, 1])
-                print("it={}, cost={:.2f}, accuracy={:.2f}".format(i, current_cost[-1], current_accuracy))
+                print(f"it={i}, cost={current_cost[-1]:.2f}, accuracy={current_accuracy:.2f}")
         thetas.append(theta)
         costs.append(current_cost)
     # Cost plot
-    row_cols = int(len(costs) / 2)
-    fig, axs = plt.subplots(row_cols, row_cols)
-    flat_axs = axs.flatten()
-    i = 0
-    for class_cost in costs:
-        flat_axs[i].set_title(classes[i])
-        flat_axs[i].set_ylabel("Cost")
-        flat_axs[i].set_xlabel("Iterations")
-        flat_axs[i].plot(class_cost)
-        i += 1
-    fig.suptitle("Cost of all classification over Iterations")
-    # plt.show()
+    if verbose:
+        row_cols = int(len(costs) / 2)
+        fig, axs = plt.subplots(row_cols, row_cols)
+        flat_axs = axs.flatten()
+        i = 0
+        for class_cost in costs:
+            flat_axs[i].set_title(classes[i])
+            flat_axs[i].set_ylabel("Cost")
+            flat_axs[i].set_xlabel("Iterations")
+            flat_axs[i].plot(class_cost)
+            i += 1
+        fig.suptitle("Cost of all classification over Iterations")
+        # plt.show()
     return thetas
 
 
@@ -117,6 +127,23 @@ def accuracy(predictions: np.ndarray, y: np.ndarray, classes: list):
     return accuracy / len(predictions)
 
 
+def train(df: pd.DataFrame, class_column: str, features: list, verbose: bool = True) -> pd.DataFrame:
+    # Calculate thetas for each classes
+    thetas = gradient_descent(df, class_column, features, alpha=0.01, iterations=10000, verbose=verbose)
+    return thetas
+
+
+def cleanDataset(df: pd.DataFrame, features: list = []) -> pd.DataFrame:
+    df.dropna(inplace=True, axis=0)
+    # Convert string features to int
+    if len(features) == 0:
+        features = df.columns.to_list()
+    for feature in features:
+        if df[feature].dtype == "object":
+            df[feature], _ = df[feature].factorize()
+    return normalize(df, features)
+
+
 if __name__ == "__main__":
     argc = len(sys.argv)
     if argc > 2:
@@ -134,7 +161,6 @@ if __name__ == "__main__":
         print("Invalid dataset: {}".format(err))
         exit(1)
     # Delete NA columns since they have missing data
-    df.dropna(inplace=True, axis=0)
     class_column = "Hogwarts House"
     features = [
         # "Arithmancy",
@@ -152,21 +178,18 @@ if __name__ == "__main__":
         # "Transfiguration",
         "Flying",
     ]
-    # Convert string features to int
-    for feature in features:
-        if df[feature].dtype == "object":
-            df[feature], _ = df[feature].factorize()
     # Normalize and calculate thetas for each classes
-    normalized = normalize(df, features)
-    thetas = gradient_descent(normalized, features, class_column, alpha=0.01, iterations=10000)
+    normalized = cleanDataset(df, features)
+    thetas = train(normalized, class_column, features, verbose=True)
     classified = classify(normalized, features, thetas)
     classes = df[class_column].unique()
-    print("Accuracy: {:.2f}".format(accuracy(classified, df[class_column], classes)))
-    # Save thetas -- One classification per column
+    print(f"Accuracy: {accuracy(classified, df[class_column], classes):.2f}")
+    # Construct result DataFrame -- One classification per column
     thetas_dict = {classes[index]: theta for index, theta in enumerate(thetas)}
     thetas_dict["Features"] = features.copy()
     thetas_dict["Features"].insert(0, "Intercept")
     df_thetas = pd.DataFrame(thetas_dict)
+    # Save thetas -- One classification per column
     try:
         df_thetas.to_csv("thetas.csv", index=False)
         print("Saved thetas to `thetas.csv`")
