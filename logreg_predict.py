@@ -1,6 +1,6 @@
 import sys
 import pandas as pd
-from logreg_train import normalize, classify
+from logreg_train import cleanDataset, classify
 
 
 def predict(df: pd.DataFrame, features: list, classes: list, thetas: pd.DataFrame) -> pd.DataFrame:
@@ -37,12 +37,7 @@ if __name__ == "__main__":
     # Load, convert and normalize the test Dataset
     try:
         df = pd.read_csv(dataset)
-        # Convert string features to int
-        for feature in features:
-            if df[feature].dtype == "object":
-                df[feature], _ = df[feature].factorize()
-        df.fillna(method="ffill", inplace=True, axis=0)
-        normalized = normalize(df, features)
+        normalized = cleanDataset(df, features)
     except IOError as err:
         print(f"Failed to read dataset: {err}")
         exit(1)

@@ -9,8 +9,8 @@ def stochastic_gradient_descent(
     df: pd.DataFrame,
     class_column: str,
     features: list,
-    alpha: int = 0.025,
-    iterations: int = 1000,
+    alpha: int = 0.3,
+    iterations: int = 2500,
     verbose: bool = True,
 ):
     """
@@ -22,8 +22,6 @@ def stochastic_gradient_descent(
     # Define parameters
     thetas = []
     costs = []
-    alpha = 0.3
-    iterations = 5000
     x = df[features].to_numpy()
     rows, columns = x.shape
     X = np.hstack((np.ones((rows, 1)), x))

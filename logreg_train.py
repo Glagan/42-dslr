@@ -131,7 +131,7 @@ def train(df: pd.DataFrame, class_column: str, features: list, verbose: bool = T
 
 
 def cleanDataset(df: pd.DataFrame, features: list = []) -> pd.DataFrame:
-    df.dropna(inplace=True, axis=0)
+    df.fillna(method="ffill", inplace=True, axis=0)
     # Convert string features to int
     if len(features) == 0:
         features = df.columns.to_list()
