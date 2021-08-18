@@ -41,6 +41,7 @@ if __name__ == "__main__":
         for feature in features:
             if df[feature].dtype == "object":
                 df[feature], _ = df[feature].factorize()
+        df.fillna(method="ffill", inplace=True, axis=0)
         normalized = normalize(df, features)
     except IOError as err:
         print(f"Failed to read dataset: {err}")
