@@ -62,25 +62,18 @@ if __name__ == "__main__":
             "The diagonal of the scatter matrix is the dispersion of the feature values each rows and columns show the feature plotted against each other features (X/Y reversed on each side of the diagonal)."
         )
         print(
-            "Features that have 4 visible groups against at least multiple other features should be selected since they will make the logistic regression much easier and accurate."
+            "Features that extract 1 house from all of the others should be selected since the logistic regression calculate weights for the houses one by one."
         )
         print(
-            "> *Arithmancy*, *Potions* and *Care of Magical Creatures* should be avoided since they all have only two visible groups against all other features."
+            "> *Arithmancy*, *Potions* and *Care of Magical Creatures* should be avoided since their dispersion between all 4 houses is homogeneous."
         )
         print(
-            "> *Astronomy*, *Herbology*, *Defense Against the Dark Arts*, *Ancient Runes* and *Charms* should be good features to use in the logistic regression."
+            "> *Divination*, *Muggle Studies*, *History of Magic*, *Transfiguration*, *Charms* and *Flying* should be good features to use in the logistic regression."
         )
         print(
-            "> *Astronomy* and *Herbology* are also complementary, their dispersion (on the diagonal) shows that they have a different dispersion for two different groups of two."
+            "> The remaining features can be used as they provide different set of houses against other houses and are complementary."
         )
-        print(
-            "> *Divination*, *Muggle Studies*, *History of Magic*, *Transfiguration* and *Flying* could help the logistic regression but also might introduce false positive since they only have 3 visible groups."
-        )
-        print(
-            '> Like with *Astronomy* and *Herbology*, the three features *Divination*, *Muggle Studies* and *History of Magic* are "complementary", they each extract one group from the other 3 groups.'
-        )
-        print('> They also extract features that have a low dispersion in the "good" features selected.')
     except IOError as err:
-        print("Failed to read dataset: {}".format(err))
+        print(f"Failed to read dataset: {err}")
     except pd.errors.ParserError as err:
-        print("Invalid dataset: {}".format(err))
+        print(f"Invalid dataset: {err}")

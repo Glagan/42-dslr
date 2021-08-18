@@ -61,16 +61,16 @@ def formatted_description(name: str, serie: pd.Series) -> dict:
     raw_results = describe_serie(serie)
     results = {
         "name": name,
-        "count": "{:.3f}".format(raw_results["count"]),
-        "mean": "{:.3f}".format(raw_results["mean"]),
-        "var": "{:.3f}".format(raw_results["var"]),
-        "std": "{:.3f}".format(raw_results["std"]),
-        "min": "{:.3f}".format(raw_results["min"]),
-        "per25": "{:.3f}".format(raw_results["per25"]),
-        "per50": "{:.3f}".format(raw_results["per50"]),
-        "per75": "{:.3f}".format(raw_results["per75"]),
-        "max": "{:.3f}".format(raw_results["max"]),
-        "range": "{:.3f}".format(raw_results["range"]),
+        "count": f"{raw_results['count']:.3f}",
+        "mean": f"{raw_results['mean']:.3f}",
+        "var": f"{raw_results['var']:.3f}",
+        "std": f"{raw_results['std']:.3f}",
+        "min": f"{raw_results['min']:.3f}",
+        "per25": f"{raw_results['per25']:.3f}",
+        "per50": f"{raw_results['per50']:.3f}",
+        "per75": f"{raw_results['per75']:.3f}",
+        "max": f"{raw_results['max']:.3f}",
+        "range": f"{raw_results['range']:.3f}",
     }
     # Set length to the longest column + 2 for padding
     results["length"] = sorted(len(v) for v in results.values())[-1] + 2
@@ -101,7 +101,7 @@ def describe(series: pd.DataFrame, output: bool = True) -> list:
             # Calculate the set of features to show per line
             try:
                 terminal_size = os.get_terminal_size().columns
-            except:
+            except Exception:
                 terminal_size = -1
             max_feature = len(described_series)
             sets = []
@@ -150,6 +150,6 @@ if __name__ == "__main__":
         df.drop(columns=["Index", "Hogwarts House", "First Name", "Last Name", "Birthday", "Best Hand"], inplace=True)
         describe(df)
     except IOError as err:
-        print("Failed to read dataset: {}".format(err))
+        print(f"Failed to read dataset: {err}")
     except pd.errors.ParserError as err:
-        print("Invalid dataset: {}".format(err))
+        print(f"Invalid dataset: {err}")

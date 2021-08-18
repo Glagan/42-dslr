@@ -37,9 +37,9 @@ if __name__ == "__main__":
         show_histograms(df, "Hogwarts House")
         print("An homogeneous feature should have it's histograms stacked on top of each other.")
         print(
-            "> *Arithmancy* and *Care of Magical Creatures* have an homogeneous score distribution between all four houses."
+            "> *Arithmancy*, *Care of Magical Creatures* and on a smaller scale *Potions* have an homogeneous score distribution between all four houses."
         )
     except IOError as err:
-        print("Failed to read dataset: {}".format(err))
+        print(f"Failed to read dataset: {err}")
     except pd.errors.ParserError as err:
-        print("Invalid dataset: {}".format(err))
+        print(f"Invalid dataset: {err}")

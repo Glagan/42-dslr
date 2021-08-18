@@ -45,9 +45,9 @@ if __name__ == "__main__":
         df.drop(columns=non_number, inplace=True)
         show_scatter(df, "Hogwarts House")
         print("Similar features between all houses should have the same groups for the same colors.")
-        print("> History of Magic and Transfiguration are similar between all four houses.")
-        print("> Arithmancy and Care of Magical Creatures are also similar between all four houses.")
+        print("> *History of Magic* and *Transfiguration* are similar between all four houses.")
+        print("> *Arithmancy* and *Care of Magical Creatures* are also similar between all four houses.")
     except IOError as err:
-        print("Failed to read dataset: {}".format(err))
+        print(f"Failed to read dataset: {err}")
     except pd.errors.ParserError as err:
-        print("Invalid dataset: {}".format(err))
+        print(f"Invalid dataset: {err}")
