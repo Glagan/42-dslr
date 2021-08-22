@@ -4,6 +4,8 @@
 
 ``Python 3``, ``pandas``, ``numpy`` and ``matplotlib``.
 
+You can install all dependencies with ``python3 -m pip install -r requirements.txt``.
+
 ## Usage
 
 The following scripts can take a single argument, the dataset that will be used, and it always defaults to the one expected by the subject (``dataset_train``).  
